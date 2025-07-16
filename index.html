@@ -105,10 +105,23 @@
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
+            text-align: left;
+            font-size: 18px;
+            line-height: 1.6;
             color: #333;
+        }
+        #result strong {
+            font-size: 22px;
+            color: #0056b3;
+        }
+        #result hr {
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin: 15px 0;
+        }
+        #result em {
+            color: #555;
+            font-weight: bold;
         }
         .hidden {
             display: none;
@@ -137,20 +150,20 @@
             <div class="input-section">
                 <h3>TRUS Inputs</h3>
                 <div class="input-group">
-                    <label>TRUS Height (H) (mm)</label>
-                    <input type="number" id="m1_trus_h" placeholder="Height">
+                    <label>TRUS Antero-posterior Length (mm)</label>
+                    <input type="number" id="m1_trus_h" placeholder="Antero-posterior Length">
                 </div>
                 <div class="input-group">
                     <label>TRUS Width (W) (mm)</label>
                     <input type="number" id="m1_trus_w" placeholder="Width">
                 </div>
                 <div class="input-group">
-                    <label>TRUS Length (L) (mm)</label>
-                    <input type="number" id="m1_trus_l" placeholder="Length">
+                    <label>TRUS Height (Cranio-caudal) (mm)</label>
+                    <input type="number" id="m1_trus_l" placeholder="Cranio-caudal Height">
                 </div>
             </div>
              <div class="input-section">
-                 <h3>Other Inputs</h3>
+                  <h3>Other Inputs</h3>
                 <div class="input-group">
                     <label>Total PSA (ng/mL)</label>
                     <input type="number" id="m1_psa" placeholder="PSA Value">
@@ -162,31 +175,31 @@
             <div class="input-section">
                 <h3>TRUS Inputs</h3>
                 <div class="input-group">
-                    <label>TRUS Height (H) (mm)</label>
-                    <input type="number" id="m2_trus_h" placeholder="Height">
+                    <label>TRUS Antero-posterior Length (mm)</label>
+                    <input type="number" id="m2_trus_h" placeholder="Antero-posterior Length">
                 </div>
                 <div class="input-group">
                     <label>TRUS Width (W) (mm)</label>
                     <input type="number" id="m2_trus_w" placeholder="Width">
                 </div>
                 <div class="input-group">
-                    <label>TRUS Length (L) (mm)</label>
-                    <input type="number" id="m2_trus_l" placeholder="Length">
+                    <label>TRUS Height (Cranio-caudal) (mm)</label>
+                    <input type="number" id="m2_trus_l" placeholder="Cranio-caudal Height">
                 </div>
             </div>
             <div class="input-section">
                 <h3>MRI Inputs</h3>
                 <div class="input-group">
-                    <label>MRI Height (H) (mm)</label>
-                    <input type="number" id="m2_mri_h" placeholder="Height">
+                    <label>MRI Antero-posterior Length (mm)</label>
+                    <input type="number" id="m2_mri_h" placeholder="Antero-posterior Length">
                 </div>
                 <div class="input-group">
                     <label>MRI Width (W) (mm)</label>
                     <input type="number" id="m2_mri_w" placeholder="Width">
                 </div>
                 <div class="input-group">
-                    <label>MRI Length (L) (mm)</label>
-                    <input type="number" id="m2_mri_l" placeholder="Length">
+                    <label>MRI Height (Cranio-caudal) (mm)</label>
+                    <input type="number" id="m2_mri_l" placeholder="Cranio-caudal Height">
                 </div>
             </div>
         </div>
@@ -195,31 +208,31 @@
             <div class="input-section">
                 <h3>TRUS Inputs</h3>
                 <div class="input-group">
-                    <label>TRUS Height (H) (mm)</label>
-                    <input type="number" id="m3_trus_h" placeholder="Height">
+                    <label>TRUS Antero-posterior Length (mm)</label>
+                    <input type="number" id="m3_trus_h" placeholder="Antero-posterior Length">
                 </div>
                 <div class="input-group">
                     <label>TRUS Width (W) (mm)</label>
                     <input type="number" id="m3_trus_w" placeholder="Width">
                 </div>
                 <div class="input-group">
-                    <label>TRUS Length (L) (mm)</label>
-                    <input type="number" id="m3_trus_l" placeholder="Length">
+                    <label>TRUS Height (Cranio-caudal) (mm)</label>
+                    <input type="number" id="m3_trus_l" placeholder="Cranio-caudal Height">
                 </div>
             </div>
             <div class="input-section">
                 <h3>MRI Inputs</h3>
                 <div class="input-group">
-                    <label>MRI Height (H) (mm)</label>
-                    <input type="number" id="m3_mri_h" placeholder="Height">
+                    <label>MRI Antero-posterior Length (mm)</label>
+                    <input type="number" id="m3_mri_h" placeholder="Antero-posterior Length">
                 </div>
                 <div class="input-group">
                     <label>MRI Width (W) (mm)</label>
                     <input type="number" id="m3_mri_w" placeholder="Width">
                 </div>
                  <div class="input-group">
-                    <label>MRI Length (L) (mm)</label>
-                    <input type="number" id="m3_mri_l" placeholder="Length">
+                    <label>MRI Height (Cranio-caudal) (mm)</label>
+                    <input type="number" id="m3_mri_l" placeholder="Cranio-caudal Height">
                 </div>
             </div>
             <div class="input-section">
@@ -264,54 +277,67 @@
         calculateBtn.addEventListener('click', function() {
             const selectedModel = document.querySelector('input[name="model"]:checked').value;
             let predictedVolume = 0;
+            let comparisonEllipsoid = 0;
+            let comparisonBullet = 0;
             const PI = Math.PI;
 
             try {
                 if (selectedModel === 'm1') {
-                    const h = parseFloat(document.getElementById('m1_trus_h').value);
-                    const w = parseFloat(document.getElementById('m1_trus_w').value);
-                    const l = parseFloat(document.getElementById('m1_trus_l').value);
+                    // Note: In JS, h is Antero-posterior, l is Cranio-caudal based on the updated labels.
+                    const h = parseFloat(document.getElementById('m1_trus_h').value); // Antero-posterior
+                    const w = parseFloat(document.getElementById('m1_trus_w').value); // Width
+                    const l = parseFloat(document.getElementById('m1_trus_l').value); // Cranio-caudal
                     const psa = parseFloat(document.getElementById('m1_psa').value);
                     
                     if ([h, w, l, psa].some(isNaN)) throw new Error("Please fill in all fields.");
                     
                     const ellipsoidVolume = (PI / 6) * h * w * l / 1000;
                     predictedVolume = -24.70 + (0.26 * h) + (0.31 * w) + (0.35 * l) + (0.63 * ellipsoidVolume) + (0.03 * psa);
+                    
+                    comparisonEllipsoid = ellipsoidVolume;
+                    comparisonBullet = (PI / 6) * w * h * h / 1000; // Bullet formula using W * AP^2
 
                 } else if (selectedModel === 'm2') {
-                    // Per your request: Ellipsoid from TRUS, linear terms from MRI
-                    const trus_h = parseFloat(document.getElementById('m2_trus_h').value);
-                    const trus_w = parseFloat(document.getElementById('m2_trus_w').value);
-                    const trus_l = parseFloat(document.getElementById('m2_trus_l').value);
-                    const mri_h = parseFloat(document.getElementById('m2_mri_h').value);
-                    const mri_w = parseFloat(document.getElementById('m2_mri_w').value);
-                    const mri_l = parseFloat(document.getElementById('m2_mri_l').value);
+                    const trus_h = parseFloat(document.getElementById('m2_trus_h').value); // Antero-posterior
+                    const trus_w = parseFloat(document.getElementById('m2_trus_w').value); // Width
+                    const trus_l = parseFloat(document.getElementById('m2_trus_l').value); // Cranio-caudal
+                    const mri_h = parseFloat(document.getElementById('m2_mri_h').value);   // MRI Antero-posterior
+                    const mri_w = parseFloat(document.getElementById('m2_mri_w').value);   // MRI Width
+                    const mri_l = parseFloat(document.getElementById('m2_mri_l').value);   // MRI Cranio-caudal
                     
                     if ([trus_h, trus_w, trus_l, mri_h, mri_w, mri_l].some(isNaN)) throw new Error("Please fill in all fields.");
                     
                     const trusEllipsoidVolume = (PI / 6) * trus_h * trus_w * trus_l / 1000;
                     predictedVolume = -20.71 + (0.27 * mri_h) + (0.20 * mri_w) + (0.29 * mri_l) + (0.69 * trusEllipsoidVolume);
 
+                    comparisonEllipsoid = trusEllipsoidVolume;
+                    comparisonBullet = (PI / 6) * trus_w * trus_h * trus_h / 1000; // Bullet formula using TRUS W * AP^2
+
                 } else if (selectedModel === 'm3') {
-                    // Per your request: Ellipsoid from TRUS, linear terms from MRI, plus 3D Slicer
-                    const trus_h = parseFloat(document.getElementById('m3_trus_h').value);
-                    const trus_w = parseFloat(document.getElementById('m3_trus_w').value);
-                    const trus_l = parseFloat(document.getElementById('m3_trus_l').value);
-                    const mri_h = parseFloat(document.getElementById('m3_mri_h').value);
-                    const mri_w = parseFloat(document.getElementById('m3_mri_w').value);
-                    const mri_l = parseFloat(document.getElementById('m3_mri_l').value);
+                    const trus_h = parseFloat(document.getElementById('m3_trus_h').value); // Antero-posterior
+                    const trus_w = parseFloat(document.getElementById('m3_trus_w').value); // Width
+                    const trus_l = parseFloat(document.getElementById('m3_trus_l').value); // Cranio-caudal
+                    const mri_h = parseFloat(document.getElementById('m3_mri_h').value);   // MRI Antero-posterior
+                    const mri_w = parseFloat(document.getElementById('m3_mri_w').value);   // MRI Width
+                    const mri_l = parseFloat(document.getElementById('m3_mri_l').value);   // MRI Cranio-caudal
                     const slicerVol = parseFloat(document.getElementById('m3_slicer_vol').value);
 
                     if ([trus_h, trus_w, trus_l, mri_h, mri_w, mri_l, slicerVol].some(isNaN)) throw new Error("Please fill in all fields.");
 
                     const trusEllipsoidVolume = (PI / 6) * trus_h * trus_w * trus_l / 1000;
                     predictedVolume = 5.12 - (0.01 * mri_h) - (0.09 * mri_w) - (0.04 * mri_l) + (0.37 * trusEllipsoidVolume) + (0.63 * slicerVol);
+
+                    comparisonEllipsoid = trusEllipsoidVolume;
+                    comparisonBullet = (PI / 6) * trus_w * trus_h * trus_h / 1000; // Bullet formula using TRUS W * AP^2
                 }
 
                 if (predictedVolume < 0) {
-                    resultDiv.textContent = `Predicted Volume: Negative Value (${predictedVolume.toFixed(2)} mL). Please check the inputs.`;
+                    resultDiv.innerHTML = `Predicted Volume: <strong>Negative Value (${predictedVolume.toFixed(2)} mL)</strong>. Please check the inputs.`;
                 } else {
-                    resultDiv.textContent = `Predicted Volume: ${predictedVolume.toFixed(2)} mL`;
+                    resultDiv.innerHTML = `Predicted Volume: <strong>${predictedVolume.toFixed(2)} mL</strong><hr>` +
+                                          `<em>For Comparison (using TRUS dimensions):</em><br>` +
+                                          `Ellipsoid Formula: ${comparisonEllipsoid.toFixed(2)} mL<br>` +
+                                          `Bullet Formula: ${comparisonBullet.toFixed(2)} mL`;
                 }
 
             } catch (error) {
