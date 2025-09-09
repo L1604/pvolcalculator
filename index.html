@@ -136,7 +136,7 @@
 
     <div class="model-selection">
         <input type="radio" id="model1" name="model" value="m1" checked>
-        <label for="model1">TRUS + PSA</label>
+        <label for="model1">TRUS-only</label>
 
         <input type="radio" id="model2" name="model" value="m2">
         <label for="model2">TRUS + MRI</label>
@@ -160,13 +160,6 @@
                 <div class="input-group">
                     <label>TRUS Height (Cranio-caudal) (mm)</label>
                     <input type="number" id="m1_trus_l" placeholder="Cranio-caudal Height">
-                </div>
-            </div>
-             <div class="input-section">
-                  <h3>Other Inputs</h3>
-                <div class="input-group">
-                    <label>Total PSA (ng/mL)</label>
-                    <input type="number" id="m1_psa" placeholder="PSA Value">
                 </div>
             </div>
         </div>
@@ -283,18 +276,18 @@
 
             try {
                 if (selectedModel === 'm1') {
-                    // Note: In JS, h is Antero-posterior, l is Cranio-caudal based on the updated labels.
-                    const h = parseFloat(document.getElementById('m1_trus_h').value); // Antero-posterior
-                    const w = parseFloat(document.getElementById('m1_trus_w').value); // Width
-                    const l = parseFloat(document.getElementById('m1_trus_l').value); // Cranio-caudal
-                    const psa = parseFloat(document.getElementById('m1_psa').value);
+                    // h is Antero-posterior (AP), l is Cranio-caudal (CC), w is Width (W)
+                    const h = parseFloat(document.getElementById('m1_trus_h').value); // AP
+                    const w = parseFloat(document.getElementById('m1_trus_w').value); // W
+                    const l = parseFloat(document.getElementById('m1_trus_l').value); // CC
                     
-                    if ([h, w, l, psa].some(isNaN)) throw new Error("Please fill in all fields.");
+                    if ([h, w, l].some(isNaN)) throw new Error("Please fill in all fields.");
                     
-                    const ellipsoidVolume = (PI / 6) * h * w * l / 1000;
-                    predictedVolume = -24.70 + (0.26 * h) + (0.31 * w) + (0.35 * l) + (0.63 * ellipsoidVolume) + (0.03 * psa);
+                    // New TRUS-only formula
+                    predictedVolume = -23.22 + (0.26 * h) + (0.29 * w) + (0.33 * l) + (0.0003 * (h * w * l));
                     
-                    comparisonEllipsoid = ellipsoidVolume;
+                    // Calculations for comparison purposes
+                    comparisonEllipsoid = (PI / 6) * h * w * l / 1000;
                     comparisonBullet = (PI / 6) * w * h * h / 1000; // Bullet formula using W * AP^2
 
                 } else if (selectedModel === 'm2') {
