@@ -3,346 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prostate Volume Calculator (Custom Logic)</title>
+    <title>MLP Prostate Volume Calculator</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .calculator-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            width: 100%;
-            max-width: 550px;
-        }
-        h1, h4 {
-            text-align: center;
-            color: #333;
-        }
-        h4 {
-            font-weight: normal;
-            margin-top:-15px;
-            margin-bottom: 25px;
-            color: #d9534f;
-        }
-        .model-selection {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .model-selection label {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .model-selection input[type="radio"] {
-            display: none;
-        }
-        .model-selection input[type="radio"]:checked + label {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-        .input-section {
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-        }
-        .input-section h3 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #007bff;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-        .input-group input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        #result {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            text-align: left;
-            font-size: 18px;
-            line-height: 1.6;
-            color: #333;
-        }
-        #result strong {
-            font-size: 22px;
-            color: #0056b3;
-        }
-        #result hr {
-            border: 0;
-            border-top: 1px solid #ccc;
-            margin: 15px 0;
-        }
-        #result em {
-            color: #555;
-            font-weight: bold;
-        }
-        .hidden {
-            display: none;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f4f7f6; display: grid; place-items: center; min-height: 90vh; }
+        .calculator { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); padding: 2rem; width: 400px; }
+        h1 { text-align: center; color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; }
+        .input-group input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 0.85rem; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #0056b3; }
+        #loading-status { text-align: center; color: #888; font-style: italic; }
+        
+        /* Result Area */
+        #result { text-align: left; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem; }
+        .result-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; }
+        .result-label { font-weight: 600; color: #333; font-size: 1.1rem; }
+        .result-value { font-size: 1.5rem; font-weight: 700; }
+        #ellipsoid-value { color: #555; }
+        #mlp-value { color: #007bff; font-size: 2.0rem; } /* Highlight ML model */
     </style>
 </head>
 <body>
 
-<div class="calculator-container">
-    <h1>Prostate Volume Calculator</h1>
-    <h4></h4>
-
-    <div class="model-selection">
-        <input type="radio" id="model1" name="model" value="m1" checked>
-        <label for="model1">TRUS-only</label>
-
-        <input type="radio" id="model2" name="model" value="m2">
-        <label for="model2">TRUS + MRI</label>
-
-        <input type="radio" id="model3" name="model" value="m3">
-        <label for="model3">TRUS + MRI + 3D</label>
-    </div>
-
-    <div id="inputs-container">
-        <div id="m1_inputs">
-            <div class="input-section">
-                <h3>TRUS Inputs</h3>
-                <div class="input-group">
-                    <label>TRUS Antero-posterior Length (mm)</label>
-                    <input type="number" id="m1_trus_h" placeholder="Antero-posterior Length">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Width (W) (mm)</label>
-                    <input type="number" id="m1_trus_w" placeholder="Width">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Height (Cranio-caudal) (mm)</label>
-                    <input type="number" id="m1_trus_l" placeholder="Cranio-caudal Height">
-                </div>
+    <div class="calculator">
+        <h1>MLP Volume Calculator</h1>
+        <p id="loading-status">Loading model parameters...</p>
+        
+        <form id="volume-form">
+            <div class="input-group">
+                <label for="f_ap">TRUS Anterior-Posterior (mm)</label>
+                <input type="number" id="f_ap" step="any" required>
             </div>
-        </div>
+            <div class="input-group">
+                <label for="f_rl">TRUS Transverse (mm)</label>
+                <input type="number" id="f_rl" step="any" required>
+            </div>
+            <div class="input-group">
+                <label for="f_cc">TRUS Cranio-Caudal (mm)</label>
+                <input type="number" id="f_cc" step="any" required>
+            </div>
+            <button type="submit" disabled>Calculate</button>
+        </form>
 
-        <div id="m2_inputs" class="hidden">
-            <div class="input-section">
-                <h3>TRUS Inputs</h3>
-                <div class="input-group">
-                    <label>TRUS Antero-posterior Length (mm)</label>
-                    <input type="number" id="m2_trus_h" placeholder="Antero-posterior Length">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Width (W) (mm)</label>
-                    <input type="number" id="m2_trus_w" placeholder="Width">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Height (Cranio-caudal) (mm)</label>
-                    <input type="number" id="m2_trus_l" placeholder="Cranio-caudal Height">
-                </div>
+        <div id="result" style="display: none;">
+            <div class="result-row">
+                <span class="result-label">Standard Ellipsoid:</span>
+                <span class="result-value" id="ellipsoid-value">-- mL</span>
             </div>
-            <div class="input-section">
-                <h3>MRI Inputs</h3>
-                <div class="input-group">
-                    <label>MRI Antero-posterior Length (mm)</label>
-                    <input type="number" id="m2_mri_h" placeholder="Antero-posterior Length">
-                </div>
-                <div class="input-group">
-                    <label>MRI Width (W) (mm)</label>
-                    <input type="number" id="m2_mri_w" placeholder="Width">
-                </div>
-                <div class="input-group">
-                    <label>MRI Height (Cranio-caudal) (mm)</label>
-                    <input type="number" id="m2_mri_l" placeholder="Cranio-caudal Height">
-                </div>
-            </div>
-        </div>
-
-        <div id="m3_inputs" class="hidden">
-            <div class="input-section">
-                <h3>TRUS Inputs</h3>
-                <div class="input-group">
-                    <label>TRUS Antero-posterior Length (mm)</label>
-                    <input type="number" id="m3_trus_h" placeholder="Antero-posterior Length">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Width (W) (mm)</label>
-                    <input type="number" id="m3_trus_w" placeholder="Width">
-                </div>
-                <div class="input-group">
-                    <label>TRUS Height (Cranio-caudal) (mm)</label>
-                    <input type="number" id="m3_trus_l" placeholder="Cranio-caudal Height">
-                </div>
-            </div>
-            <div class="input-section">
-                <h3>MRI Inputs</h3>
-                <div class="input-group">
-                    <label>MRI Antero-posterior Length (mm)</label>
-                    <input type="number" id="m3_mri_h" placeholder="Antero-posterior Length">
-                </div>
-                <div class="input-group">
-                    <label>MRI Width (W) (mm)</label>
-                    <input type="number" id="m3_mri_w" placeholder="Width">
-                </div>
-                 <div class="input-group">
-                    <label>MRI Height (Cranio-caudal) (mm)</label>
-                    <input type="number" id="m3_mri_l" placeholder="Cranio-caudal Height">
-                </div>
-            </div>
-            <div class="input-section">
-                <h3>Other Inputs</h3>
-                <div class="input-group">
-                    <label>3D Slicer Volume (mL)</label>
-                    <input type="number" id="m3_slicer_vol" placeholder="3D Volume">
-                </div>
+            <div class="result-row">
+                <span class="result-label">MLP Prediction:</span>
+                <span class="result-value" id="mlp-value">-- mL</span>
             </div>
         </div>
     </div>
 
-    <button id="calculateBtn">CALCULATE</button>
-    
-    <div id="result">
-        Predicted Volume Will Appear Here
-    </div>
-</div>
+    <script>
+        // --- 1. Model Parameters Global Variable ---
+        let MLP_MODEL = null;
+        const PI_over_6 = Math.PI / 6;
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const models = document.querySelectorAll('input[name="model"]');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const resultDiv = document.getElementById('result');
-
-        const inputGroups = {
-            m1: document.getElementById('m1_inputs'),
-            m2: document.getElementById('m2_inputs'),
-            m3: document.getElementById('m3_inputs')
-        };
-
-        function updateVisibleInputs() {
-            const selectedModel = document.querySelector('input[name="model"]:checked').value;
-            for (const model in inputGroups) {
-                inputGroups[model].classList.add('hidden');
+        // --- 2. Required Math Helper Functions ---
+        function relu(x) { return Math.max(0, x); }
+        function dot(vector, matrix_column, bias) {
+            let sum = bias;
+            for (let i = 0; i < vector.length; i++) {
+                sum += vector[i] * matrix_column[i];
             }
-            inputGroups[selectedModel].classList.remove('hidden');
+            return sum;
         }
 
-        models.forEach(model => model.addEventListener('change', updateVisibleInputs));
-        
-        calculateBtn.addEventListener('click', function() {
-            const selectedModel = document.querySelector('input[name="model"]:checked').value;
-            let predictedVolume = 0;
-            let comparisonEllipsoid = 0;
-            let comparisonBullet = 0;
-            const PI = Math.PI;
+        // --- 3. MLP Forward Pass (Re-implemented in JavaScript) ---
+        function predict(inputs_3d) {
+            const [ap, rl, cc] = inputs_3d;
+            const { scaler_mean, scaler_scale, mlp_coefs, mlp_intercepts } = MLP_MODEL;
 
+            // --- Step a: Calculate the 4th feature (Ellipsoid) ---
+            const ellipsoid_vol = (ap * rl * cc * PI_over_6) / 1000;
+            
+            // Prepare the 4 features in the order the model was trained:
+            // [trus_ellipsoid_calc, trusgolcum_1, trusgolcum_2, trusgolcum_3]
+            const inputs_4d = [ellipsoid_vol, ap, rl, cc];
+
+            // --- Step b: Apply StandardScaler ---
+            let scaled_inputs = [];
+            for (let i = 0; i < inputs_4d.length; i++) {
+                scaled_inputs[i] = (inputs_4d[i] - scaler_mean[i]) / scaler_scale[i];
+            }
+            
+            // --- Step c: Input(4) -> Hidden Layer 1 (50 neurons) ---
+            const weights_h1 = mlp_coefs[0];
+            const biases_h1 = mlp_intercepts[0];
+            let layer1_outputs = [];
+            for (let i = 0; i < biases_h1.length; i++) {
+                let neuron_weights = weights_h1.map(row => row[i]);
+                layer1_outputs[i] = relu(dot(scaled_inputs, neuron_weights, biases_h1[i]));
+            }
+
+            // --- Step d: Hidden Layer 1 (50) -> Hidden Layer 2 (25 neurons) ---
+            const weights_h2 = mlp_coefs[1];
+            const biases_h2 = mlp_intercepts[1];
+            let layer2_outputs = [];
+            for (let i = 0; i < biases_h2.length; i++) {
+                let neuron_weights = weights_h2.map(row => row[i]);
+                layer2_outputs[i] = relu(dot(layer1_outputs, neuron_weights, biases_h2[i]));
+            }
+
+            // --- Step e: Hidden Layer 2 (25) -> Output Layer (1 neuron) ---
+            const weights_out = mlp_coefs[2];
+            const biases_out = mlp_intercepts[2];
+            let neuron_weights_out = weights_out.map(row => row[0]);
+            let final_output = dot(layer2_outputs, neuron_weights_out, biases_out[0]);
+
+            // Return both the MLP result and the standard Ellipsoid calculation
+            return {
+                mlp_prediction: final_output,
+                ellipsoid_calculation: ellipsoid_vol 
+            };
+        }
+
+        // --- 4. Model Loading and Form Events ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusEl = document.getElementById('loading-status');
+            const buttonEl = document.querySelector('button');
             try {
-                if (selectedModel === 'm1') {
-                    // h is Antero-posterior (AP), l is Cranio-caudal (CC), w is Width (W)
-                    const h = parseFloat(document.getElementById('m1_trus_h').value); // AP
-                    const w = parseFloat(document.getElementById('m1_trus_w').value); // W
-                    const l = parseFloat(document.getElementById('m1_trus_l').value); // CC
-                    
-                    if ([h, w, l].some(isNaN)) throw new Error("Please fill in all fields.");
-                    
-                    // New TRUS-only formula
-                    predictedVolume = -23.22 + (0.26 * h) + (0.29 * w) + (0.33 * l) + (0.0003 * (h * w * l));
-                    
-                    // Calculations for comparison purposes
-                    comparisonEllipsoid = (PI / 6) * h * w * l / 1000;
-                    comparisonBullet = (PI / 6) * w * h * h / 1000; // Bullet formula using W * AP^2
-
-                } else if (selectedModel === 'm2') {
-                    const trus_h = parseFloat(document.getElementById('m2_trus_h').value); // Antero-posterior
-                    const trus_w = parseFloat(document.getElementById('m2_trus_w').value); // Width
-                    const trus_l = parseFloat(document.getElementById('m2_trus_l').value); // Cranio-caudal
-                    const mri_h = parseFloat(document.getElementById('m2_mri_h').value);   // MRI Antero-posterior
-                    const mri_w = parseFloat(document.getElementById('m2_mri_w').value);   // MRI Width
-                    const mri_l = parseFloat(document.getElementById('m2_mri_l').value);   // MRI Cranio-caudal
-                    
-                    if ([trus_h, trus_w, trus_l, mri_h, mri_w, mri_l].some(isNaN)) throw new Error("Please fill in all fields.");
-                    
-                    const trusEllipsoidVolume = (PI / 6) * trus_h * trus_w * trus_l / 1000;
-                    predictedVolume = -20.71 + (0.27 * mri_h) + (0.20 * mri_w) + (0.29 * mri_l) + (0.69 * trusEllipsoidVolume);
-
-                    comparisonEllipsoid = trusEllipsoidVolume;
-                    comparisonBullet = (PI / 6) * trus_w * trus_h * trus_h / 1000; // Bullet formula using TRUS W * AP^2
-
-                } else if (selectedModel === 'm3') {
-                    const trus_h = parseFloat(document.getElementById('m3_trus_h').value); // Antero-posterior
-                    const trus_w = parseFloat(document.getElementById('m3_trus_w').value); // Width
-                    const trus_l = parseFloat(document.getElementById('m3_trus_l').value); // Cranio-caudal
-                    const mri_h = parseFloat(document.getElementById('m3_mri_h').value);   // MRI Antero-posterior
-                    const mri_w = parseFloat(document.getElementById('m3_mri_w').value);   // MRI Width
-                    const mri_l = parseFloat(document.getElementById('m3_mri_l').value);   // MRI Cranio-caudal
-                    const slicerVol = parseFloat(document.getElementById('m3_slicer_vol').value);
-
-                    if ([trus_h, trus_w, trus_l, mri_h, mri_w, mri_l, slicerVol].some(isNaN)) throw new Error("Please fill in all fields.");
-
-                    const trusEllipsoidVolume = (PI / 6) * trus_h * trus_w * trus_l / 1000;
-                    predictedVolume = 5.12 - (0.01 * mri_h) - (0.09 * mri_w) - (0.04 * mri_l) + (0.37 * trusEllipsoidVolume) + (0.63 * slicerVol);
-
-                    comparisonEllipsoid = trusEllipsoidVolume;
-                    comparisonBullet = (PI / 6) * trus_w * trus_h * trus_h / 1000; // Bullet formula using TRUS W * AP^2
+                // Fetch the model from the repository (or local server)
+                const response = await fetch('mlp_model.json'); 
+                if (!response.ok) {
+                    throw new Error(`Model file could not be loaded (HTTP ${response.status})`);
                 }
-
-                if (predictedVolume < 0) {
-                    resultDiv.innerHTML = `Predicted Volume: <strong>Negative Value (${predictedVolume.toFixed(2)} mL)</strong>. Please check the inputs.`;
-                } else {
-                    resultDiv.innerHTML = `Predicted Volume: <strong>${predictedVolume.toFixed(2)} mL</strong><hr>` +
-                                          `<em>For Comparison (using TRUS dimensions):</em><br>` +
-                                          `Ellipsoid Formula: ${comparisonEllipsoid.toFixed(2)} mL<br>` +
-                                          `Bullet Formula: ${comparisonBullet.toFixed(2)} mL`;
-                }
+                MLP_MODEL = await response.json();
+                
+                statusEl.textContent = 'Model loaded successfully. Ready to calculate.';
+                statusEl.style.color = 'green';
+                buttonEl.disabled = false;
 
             } catch (error) {
-                alert(error.message);
-                resultDiv.textContent = 'Calculation error!';
+                console.error(error);
+                statusEl.textContent = 'ERROR: mlp_model.json failed to load. (Read instructions)';
+                statusEl.style.color = 'red';
             }
         });
 
-        // Initial check
-        updateVisibleInputs();
-    });
-</script>
+        // Handle form submission
+        document.getElementById('volume-form').addEventListener('submit', (event) => {
+            event.preventDefault(); 
+            if (!MLP_MODEL) { alert("Model is not loaded yet!"); return; }
 
+            // Get the 3 inputs
+            const inputs_3d = [
+                parseFloat(document.getElementById('f_ap').value),
+                parseFloat(document.getElementById('f_rl').value),
+                parseFloat(document.getElementById('f_cc').value)
+            ];
+
+            // Get predictions
+            const results = predict(inputs_3d);
+
+            // Print both results to the screen
+            document.getElementById('ellipsoid-value').textContent = `${results.ellipsoid_calculation.toFixed(2)} mL`;
+            document.getElementById('mlp-value').textContent = `${results.mlp_prediction.toFixed(2)} mL`;
+            document.getElementById('result').style.display = 'block';
+        });
+    </script>
 </body>
 </html>
